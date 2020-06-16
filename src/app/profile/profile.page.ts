@@ -994,4 +994,8 @@ export class ProfilePage implements OnInit {
     }
   }
 
+  navigateToShowcase() {
+    this.router.navigate(['showcase']);
+  }
+
 }

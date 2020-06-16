@@ -3,12 +3,14 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 
 import { CommonUtilService } from '@app/services/common-util.service';
 import { SharedPreferences } from 'sunbird-sdk';
+import { Observable } from 'rxjs';
 
 enum InputType {
   INPUT = 'input',
   CHECKBOX = 'checkbox',
   SELECT = 'select',
-  LABEL = 'label'
+  LABEL = 'label',
+  NESTED_SELECT = 'nested_select'
 }
 
 enum ValidationType {
@@ -39,6 +41,14 @@ export class CommonFormsComponent implements OnInit {
   formInputTypes = InputType;
   formValidationTypes = ValidationType;
   appName = '';
+
+  isArray(input: any) {
+    return Array.isArray(input);
+  }
+
+  isObject(input: any) {
+    return !Array.isArray(input) && typeof input === 'object';
+  }
 
   constructor(
     @Inject('SHARED_PREFERENCES') private sharedPreferences: SharedPreferences,
@@ -82,15 +92,18 @@ export class CommonFormsComponent implements OnInit {
     let defaultVal: any = '';
     switch (element.type) {
       case this.formInputTypes.INPUT:
-        defaultVal = element.templateOptions.type === 'number' ? 0 : '';
+        defaultVal = element.templateOptions.type === 'number' ?
+          (element.defaultVal && Number.isInteger(element.defaultVal) ? element.defaultVal : 0) : '';
         break;
       case this.formInputTypes.SELECT:
-        defaultVal = element.templateOptions.multiple ? [] : '';
+        defaultVal = element.templateOptions.multiple ? 
+        (element.defaultVal && Array.isArray(element.defaultVal) ? element.defaultVal : []) : '';
         break;
       case this.formInputTypes.CHECKBOX:
-        defaultVal = false;
+        defaultVal = false || !!element.defaultVal;
         break;
     }
+
     formValueList.push(defaultVal);
 
     if (element.validations && element.validations.length) {
@@ -122,6 +135,13 @@ export class CommonFormsComponent implements OnInit {
   }
 
   fetchInterfaceOption(fieldName) {
+    if (!fieldName) {
+      return {
+        header: 'sample_text undefined',
+        cssClass: 'select-box',
+        animated: false
+      };
+    }
     return {
       header: this.commonUtilService.translateMessage(fieldName).toLocaleUpperCase(),
       cssClass: 'select-box',

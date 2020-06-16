@@ -15,21 +15,65 @@
       </ion-item>
     </ng-container>
 
-    <ion-item class="input-item" appCustomIonSelect *ngIf="formElement.type === formInputTypes.SELECT">
+    <ion-item class="input-item" appCustomIonSelect *ngIf="formElement.type === formInputTypes.SELECT || formElement.type === formInputTypes.NESTED_SELECT">
       <ion-label position="stacked" class="label-font align-text">{{ formElement.templateOptions?.label | translate }}</ion-label>
-      <ion-select
-        formControlName="{{formElement.code}}"
-        [multiple]="formElement.templateOptions?.multiple"
-        [interfaceOptions]="fetchInterfaceOption(formElement.templateOptions?.label)"
-        [disabled]="!formElement.templateOptions?.options?.length || checkDisableCondition(formElement)"
-        placeholder="{{ formElement.templateOptions?.placeHolder | translate }}"
-        okText="{{'BTN_SUBMIT' | translate}}"
-        cancelText="{{'CANCEL' | translate}}"
-        (ionChange)="onInputChange($event)">
-        <ion-select-option *ngFor="let selectElement of formElement.templateOptions?.options" value="{{selectElement?.value}}">
-          {{selectElement?.label}}
-        </ion-select-option>
-      </ion-select>
+      <ng-container *ngIf="isArray(formElement.templateOptions?.options)">
+        <ion-select
+          formControlName="{{formElement.code}}"
+          [multiple]="formElement.templateOptions?.multiple"
+          [interfaceOptions]="fetchInterfaceOption(formElement.templateOptions?.label)"
+          [disabled]="!formElement.templateOptions?.options?.length || checkDisableCondition(formElement)"
+          placeholder="{{ formElement.templateOptions?.placeHolder | translate }}"
+          okText="{{'BTN_SUBMIT' | translate}}"
+          cancelText="{{'CANCEL' | translate}}"
+          (ionChange)="onInputChange($event)">
+          <ion-select-option *ngFor="let selectElement of formElement.templateOptions?.options" value="{{selectElement?.value}}">
+            {{selectElement?.label}}
+          </ion-select-option>
+        </ion-select>
+      </ng-container>
+
+      <ng-container *ngIf="!isArray(formElement.templateOptions?.options) && !isObject(formElement.templateOptions?.options)">
+        <ng-container *ngIf="formElement.templateOptions?.options(commonFormGroup.controls[formElement.context]) | async as options"> 
+          <ion-select
+            formControlName="{{formElement.code}}"
+            [multiple]="formElement.templateOptions?.multiple"
+            [interfaceOptions]="fetchInterfaceOption(formElement.templateOptions?.label)"
+            [disabled]="!options.length || checkDisableCondition(formElement)"
+            placeholder="{{ formElement.templateOptions?.placeHolder | translate }}"
+            okText="{{'BTN_SUBMIT' | translate}}"
+            cancelText="{{'CANCEL' | translate}}"
+            (ionChange)="onInputChange($event)">
+            <ion-select-option *ngFor="let selectElement of options" value="{{selectElement?.value}}">
+              {{selectElement?.label}}
+            </ion-select-option>
+          </ion-select>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngIf="!isArray(formElement.templateOptions?.options) && isObject(formElement.templateOptions?.options)">
+        <ng-container *ngIf="formElement.templateOptions?.options[commonFormGroup.controls[formElement.context].value] as options"> 
+          <ion-select
+            formControlName="{{formElement.code}}"
+            [multiple]="formElement.templateOptions?.multiple"
+            [interfaceOptions]="fetchInterfaceOption(formElement.templateOptions?.label)"
+            [disabled]="!options.length || checkDisableCondition(formElement)"
+            placeholder="{{ formElement.templateOptions?.placeHolder | translate }}"
+            okText="{{'BTN_SUBMIT' | translate}}"
+            cancelText="{{'CANCEL' | translate}}"
+            (ionChange)="onInputChange($event)">
+            <ion-select-option *ngFor="let selectElement of options" value="{{selectElement?.value}}">
+              {{selectElement?.label}}
+            </ion-select-option>
+          </ion-select>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngIf="formElement.type === 'nested_select' && commonFormGroup.controls[formElement.code].value && formElement.children[commonFormGroup.controls[formElement.code].value]">
+        <app-common-forms
+          [formList]="formElement.children[commonFormGroup.controls[formElement.code].value]">
+        </app-common-forms>
+      </ng-container>
     </ion-item>
 
     <div class="flex-container M16" *ngIf="formElement.type === formInputTypes.CHECKBOX">

@@ -23,6 +23,7 @@
             </span>
         </p>
         <p class="MT0 MB30"><span class="app-name"> {{appName}} </span> <span class="txt-uppercase"> {{'ID' | translate }}: </span><span>{{profile?.userName}}</span></p>
+        <ion-button (click)="navigateToShowcase()" >Showcase</ion-button>
     </div>
     <div class="roles-container ion-text-center ion-padding-horizontal">
         <div class="MB5 ion-text-center" *ngFor="let role of roles | slice : startLimit:rolesLimit;">

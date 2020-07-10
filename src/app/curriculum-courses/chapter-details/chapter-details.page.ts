@@ -504,6 +504,7 @@ export class ChapterDetailsPage implements OnInit, OnDestroy {
         moduleId: this.chapter.identifier,
         subContentIds: this.subContentIds,
         // corRelationList: this.corRelationList,
+        objRollup: this.objRollup,
         pageId: PageId.CHAPTER_DETAILS,
         shareItemType: ShareItemType.ROOT_COLECTION
       },
